@@ -1,5 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+function isPrivateHost(hostname: string): boolean {
+  const host = hostname.toLowerCase().trim();
+  if (
+    host === 'localhost' ||
+    host === '127.0.0.1' ||
+    host === '0.0.0.0' ||
+    host === '::1' ||
+    host.endsWith('.local') ||
+    host.endsWith('.internal')
+  ) {
+    return true;
+  }
+
+  // Verificar faixas de IP privadas e AWS/Cloud metadata (169.254.x)
+  if (
+    /^10\./.test(host) ||
+    /^192\.168\./.test(host) ||
+    /^169\.254\./.test(host) ||
+    /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { url } = await req.json();
@@ -18,6 +44,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'URL inválida.' },
         { status: 400 }
+      );
+    }
+
+    // Proteção contra SSRF: apenas HTTP e HTTPS públicos
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+      return NextResponse.json(
+        { success: false, error: 'Apenas protocolos HTTP e HTTPS são permitidos.' },
+        { status: 400 }
+      );
+    }
+
+    if (isPrivateHost(parsedUrl.hostname)) {
+      return NextResponse.json(
+        { success: false, error: 'Acesso a endereços locais ou internos é proibido.' },
+        { status: 403 }
       );
     }
 
@@ -45,7 +86,8 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const html = await response.text();
+    // Limitar leitura a 1MB para proteção contra DoS
+    const html = (await response.text()).slice(0, 1024 * 1024);
 
     // 1. Extração de Imagem (og:image, twitter:image, link rel=image_src)
     let imageUrl = '';
