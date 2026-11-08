@@ -20,6 +20,16 @@ export interface GoalItem {
   created_at?: string;
 }
 
+export interface GoalShare {
+  id: string;
+  goal_id: string;
+  owner_id: string;
+  shared_with_email: string;
+  shared_with_user_id?: string | null;
+  status: 'pending' | 'accepted';
+  created_at?: string;
+}
+
 export interface Goal {
   id: string;
   user_id: string;
@@ -30,5 +40,19 @@ export interface Goal {
   saved_amount?: number;
   created_at?: string;
   items?: GoalItem[];
+  shares?: GoalShare[];
+  is_shared?: boolean;
+  is_owner?: boolean;
 }
 
+export interface Badge {
+  id: string;
+  icon: string;
+  title: string;
+  description: string;
+  category: 'início' | 'economia' | 'parceria' | 'conquista';
+  color: ColorTheme;
+  unlocked: boolean;
+  progress: number; // 0 to 100
+  progressText: string;
+}

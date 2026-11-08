@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Plus, ExternalLink, Trash2, CheckCircle2, Circle, Sparkles, Zap, ArrowLeft, ZoomIn } from 'lucide-react';
+import { X, Plus, ExternalLink, Trash2, CheckCircle2, Circle, Sparkles, Zap, ArrowLeft, ZoomIn, Heart } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Goal } from '@/types/database';
 import { calculateGoalStats, formatCurrencyBRL } from '@/lib/calculations';
@@ -21,6 +21,7 @@ interface GoalDetailsModalProps {
   onOpenAddItem: (goalId: string) => void;
   onOpenPiggyBank?: (goal: Goal) => void;
   onUpdateDeadline?: (goalId: string, newMonths: number) => void;
+  onOpenCoupleModal?: (goalId: string) => void;
 }
 
 export function GoalDetailsModal({
@@ -34,6 +35,7 @@ export function GoalDetailsModal({
   onOpenAddItem,
   onOpenPiggyBank,
   onUpdateDeadline,
+  onOpenCoupleModal,
 }: GoalDetailsModalProps) {
   useBodyScrollLock(isOpen);
   const { showToast, confirmDialog } = useToast();
@@ -137,13 +139,29 @@ export function GoalDetailsModal({
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="w-10 h-10 rounded-full bg-white/90 hover:bg-white text-gray-500 hover:text-cream-900 flex items-center justify-center border border-peach-200 transition-colors shadow-soft"
-            title="Fechar"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {onOpenCoupleModal && (
+              <button
+                type="button"
+                onClick={() => onOpenCoupleModal(goal.id)}
+                className="flex items-center gap-1.5 px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition-all shadow-sm active:scale-95"
+                title="Modo Casal / Compartilhar esta meta"
+              >
+                <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
+                <span className="text-[11px] font-bold">
+                  {((goal.shares && goal.shares.length > 0) || goal.is_shared) ? 'Modo Casal 💕' : 'A Dois 💕'}
+                </span>
+              </button>
+            )}
+
+            <button
+              onClick={onClose}
+              className="w-10 h-10 rounded-full bg-white/90 hover:bg-white text-gray-500 hover:text-cream-900 flex items-center justify-center border border-peach-200 transition-colors shadow-soft"
+              title="Fechar"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Corpo Unificado com Rolagem Fluida e Completa */}

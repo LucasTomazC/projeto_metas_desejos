@@ -82,7 +82,12 @@ export function AccelerationSimulator({
             {onApplyNewDeadline && (
               <button
                 type="button"
-                onClick={() => onApplyNewDeadline(simulatedMonths)}
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    localStorage.setItem('jennyfer_accelerator_used', 'true');
+                  }
+                  onApplyNewDeadline(simulatedMonths);
+                }}
                 className="block text-[10px] font-bold text-coral-600 hover:text-coral-700 underline mt-1.5"
               >
                 Adotar este prazo

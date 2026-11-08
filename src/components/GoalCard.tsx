@@ -64,9 +64,16 @@ export function GoalCard({ goal, salary, onClick, onOpenPiggyBank }: GoalCardPro
             {goal.category_icon || '✨'}
           </div>
           <div>
-            <span className={`text-[11px] font-bold tracking-wider uppercase ${theme.accentText}`}>
-              Meta Planejada
-            </span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className={`text-[11px] font-bold tracking-wider uppercase ${theme.accentText}`}>
+                Meta Planejada
+              </span>
+              {((goal.shares && goal.shares.length > 0) || goal.is_shared) && (
+                <span className="flex items-center gap-0.5 text-[10px] font-bold text-rose-700 bg-rose-100/90 border border-rose-200/80 px-2 py-0.5 rounded-full">
+                  <span>💕</span> A Dois
+                </span>
+              )}
+            </div>
             <h3 className="text-base font-extrabold text-cream-900 leading-tight">
               {goal.title}
             </h3>

@@ -13,6 +13,10 @@ import { NewItemModal } from '@/components/NewItemModal';
 import { AuthModal } from '@/components/AuthModal';
 import { PiggyBankModal } from '@/components/PiggyBankModal';
 import { PwaAndBackupModal } from '@/components/PwaAndBackupModal';
+import { BadgesModal } from '@/components/BadgesModal';
+import { CoupleShareModal } from '@/components/CoupleShareModal';
+import { TopAchievementsAndCoupleBanner } from '@/components/TopAchievementsAndCoupleBanner';
+import { calculateBadges } from '@/lib/badges';
 
 const DEFAULT_DEMO_GOALS: Goal[] = [
   {
@@ -103,6 +107,9 @@ export default function HomePage() {
   const [newItemGoalId, setNewItemGoalId] = useState<string | null>(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isPwaModalOpen, setIsPwaModalOpen] = useState(false);
+  const [isBadgesOpen, setIsBadgesOpen] = useState(false);
+  const [isCoupleModalOpen, setIsCoupleModalOpen] = useState(false);
+  const [coupleInitialGoalId, setCoupleInitialGoalId] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -166,13 +173,18 @@ export default function HomePage() {
           deadline_months,
           saved_amount,
           created_at,
-          items:goal_items(*)
+          items:goal_items(*),
+          shares:goal_shares(*)
         `)
-        .eq('user_id', userId)
         .order('created_at', { ascending: true });
 
       if (!goalsError && goalsData) {
-        setGoals(goalsData as Goal[]);
+        const enriched = (goalsData as any[]).map(g => ({
+          ...g,
+          is_owner: g.user_id === userId,
+          is_shared: (g.shares && g.shares.length > 0) || g.user_id !== userId
+        }));
+        setGoals(enriched as Goal[]);
       }
     } catch (err) {
       console.error('Erro ao buscar dados no Supabase:', err);
@@ -460,6 +472,17 @@ export default function HomePage() {
 
       {/* Conteúdo Principal Mobile-First */}
       <div className="w-full max-w-md mx-auto px-4 mt-5 flex-1 flex flex-col">
+        {/* Painel de Topo: Conquistas & Modo Casal 💕 */}
+        <TopAchievementsAndCoupleBanner
+          goals={goals}
+          user={user}
+          onOpenBadges={() => setIsBadgesOpen(true)}
+          onOpenCoupleModal={() => {
+            setCoupleInitialGoalId(null);
+            setIsCoupleModalOpen(true);
+          }}
+        />
+
         {/* Título da Seção */}
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -544,8 +567,37 @@ export default function HomePage() {
           onOpenAddItem={(goalId) => setNewItemGoalId(goalId)}
           onOpenPiggyBank={(goal) => setPiggyBankGoal(goal)}
           onUpdateDeadline={handleUpdateDeadline}
+          onOpenCoupleModal={(goalId) => {
+            setSelectedGoal(null);
+            setCoupleInitialGoalId(goalId);
+            setIsCoupleModalOpen(true);
+          }}
         />
       )}
+
+      {/* Modal de Conquistas & Gamificação */}
+      <BadgesModal
+        isOpen={isBadgesOpen}
+        onClose={() => setIsBadgesOpen(false)}
+        badges={calculateBadges(goals, false)}
+      />
+
+      {/* Modal de Casal & Compartilhamento */}
+      <CoupleShareModal
+        isOpen={isCoupleModalOpen}
+        onClose={() => {
+          setIsCoupleModalOpen(false);
+          setCoupleInitialGoalId(null);
+        }}
+        goals={goals}
+        user={user}
+        initialGoalId={coupleInitialGoalId}
+        onRefreshData={() => {
+          if (user) loadSupabaseData(user.id);
+          else loadLocalData();
+        }}
+        onOpenAuth={() => setIsAuthOpen(true)}
+      />
 
       {piggyBankGoal && (
         <PiggyBankModal

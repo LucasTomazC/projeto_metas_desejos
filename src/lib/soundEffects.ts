@@ -112,6 +112,33 @@ class SoundFX {
       osc.stop(now + 0.06);
     } catch {}
   }
+  // 4. Som de Conquista Especial / Fanfarra Triunfal 🏆
+  public playFanfare() {
+    if (!this.enabled) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+
+      const notes = [440, 554.37, 659.25, 880]; // A4, C#5, E5, A5
+      notes.forEach((freq, idx) => {
+        const startTime = ctx.currentTime + idx * 0.09;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, startTime);
+
+        gain.gain.setValueAtTime(0.2, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.5);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + 0.55);
+      });
+    } catch {}
+  }
 }
 
 export const soundFX = new SoundFX();

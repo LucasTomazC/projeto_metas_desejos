@@ -109,3 +109,11 @@ alter table public.goal_items enable row level security;
 - [x] Criação de novas metas com campo numérico livre (1 a 36 meses) e atalhos rápidos.
 - [x] Efeitos sonoros táteis via Web Audio API (som de moeda no cofrinho e sino triunfante ao conquistar itens).
 
+### 📍 ETAPA 4: Gamificação & Conquistas (Badges) + Modo Casal & Metas Compartilhadas (CONCLUÍDA ✅)
+- [x] Tabela `public.goal_shares` e políticas RLS criadas no Supabase com permissões granulares para proprietário e parceiro(a).
+- [x] Componente `TopAchievementsAndCoupleBanner` integrado no topo da tela inicial com progresso de selos e status do Modo Casal.
+- [x] Sistema dinâmico de Conquistas (`src/lib/badges.ts` e `BadgesModal.tsx`): 8 selos fofos em tons pastel com detecção automática de conquistas inéditas, confetes e fanfarra triunfal.
+- [x] Componente `CoupleShareModal.tsx`: convite de parceiro por e-mail em nuvem via Supabase e suporte offline/local com personalização afetiva.
+- [x] Badges visuais `"💕 A Dois"` nos cards de metas (`GoalCard.tsx`) e botão de gerenciamento de parceria dentro de `GoalDetailsModal.tsx`.
+
+
